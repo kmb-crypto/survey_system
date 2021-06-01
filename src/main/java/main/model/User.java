@@ -9,8 +9,9 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "users")
-@Data@NoArgsConstructor
-public class User extends BaseEntity{
+@Data
+@NoArgsConstructor
+public class User extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
@@ -20,4 +21,7 @@ public class User extends BaseEntity{
     @Column(nullable = false)
     private String password;
 
+    public Role getRole() {
+        return isModerator == 1 ? Role.MODERATOR : Role.USER;
+    }
 }
