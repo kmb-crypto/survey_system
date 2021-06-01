@@ -16,12 +16,12 @@ public class User extends BaseEntity {
     private String name;
 
     @Column(name = "is_moderator", nullable = false)
-    private byte isModerator;
+    private boolean isModerator;
 
     @Column(nullable = false)
     private String password;
 
     public Role getRole() {
-        return isModerator == 1 ? Role.MODERATOR : Role.USER;
+        return isModerator ? Role.MODERATOR : Role.USER;
     }
 }
