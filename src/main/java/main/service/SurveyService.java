@@ -2,6 +2,7 @@ package main.service;
 
 import main.api.request.SurveyCreateRequest;
 import main.api.response.SurveyCreateResponse;
+import main.api.response.SurveyDeleteResponse;
 import main.model.Survey;
 import main.repository.SurveyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +23,24 @@ public class SurveyService {
         this.surveyRepository = surveyRepository;
     }
 
-    public SurveyCreateResponse createSurvey(final SurveyCreateRequest surveyCreateRequest) {
+    public SurveyCreateResponse getSurveyCreateResponse(final SurveyCreateRequest surveyCreateRequest) {
         Optional<HashMap<String, String>> optionalErrors = checkSurveyCreateRequest(surveyCreateRequest);
         if (optionalErrors.isPresent()) {
             return new SurveyCreateResponse(false, optionalErrors.get());
         } else {
             addNewSurvey(surveyCreateRequest);
             return new SurveyCreateResponse(true);
+        }
+    }
+
+    //TODO изменение опроса
+
+    public SurveyDeleteResponse getSurveyDeleteResponse(final int id) {
+        if (surveyRepository.existsById(id)) {
+            deleteSurvey(id);
+            return new SurveyDeleteResponse(true);
+        } else {
+            return new SurveyDeleteResponse(false);
         }
     }
 
@@ -48,5 +60,9 @@ public class SurveyService {
         survey.setDescription(surveyCreateRequest.getDescription());
         survey.setActive(false);
         surveyRepository.save(survey);
+    }
+
+    private void deleteSurvey(final int id) {
+        surveyRepository.deleteById(id);
     }
 }
