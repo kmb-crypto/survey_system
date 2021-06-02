@@ -1,7 +1,7 @@
-API
+<H1>API</H1>
 
-авторизация
-POST /api/auth/login
+<h3>авторизация<br>
+POST /api/auth/login</h3>
 
 запрос:
 {
@@ -23,3 +23,7 @@ POST /api/auth/login
 {
     "result": false
 }
+
+
+<h3>создание опроса<br>
+POST /api/surveys/</h3>

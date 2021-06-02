@@ -1,6 +1,7 @@
 package main.model;
 
 
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
@@ -10,10 +11,11 @@ import java.util.List;
 @Entity
 @Table(name = "surveys")
 @NoArgsConstructor
-public class Survey extends BaseEntity{
+@Data
+public class Survey extends BaseEntity {
     private String title;
 
-    @Column(name = "start_date")
+    @Column(name = "start_date", nullable = false)
     private Date startDate;
 
     @Column(name = "finish_date")
@@ -21,7 +23,8 @@ public class Survey extends BaseEntity{
 
     private String description;
 
+    private boolean active;
+
     @OneToMany(mappedBy = "survey", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Question> questions;
-
 }
