@@ -1,9 +1,7 @@
 package main.controller;
 
 import main.api.request.QuestionRequest;
-import main.api.request.SurveyRequest;
-import main.api.response.QuestionResponse;
-import main.api.response.SurveyResponse;
+import main.api.response.QuestionProcessResponse;
 import main.service.QuestionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,25 +19,25 @@ public class QuestionController {
 
     @PostMapping("/questions")
     @PreAuthorize("hasAuthority('user:moderate')")
-    public ResponseEntity<QuestionResponse> addQuestion(@RequestBody final QuestionRequest questionRequest) {
-        return new ResponseEntity<QuestionResponse>(questionService.getQuestionAddResponse(questionRequest),
+    public ResponseEntity<QuestionProcessResponse> addQuestion(@RequestBody final QuestionRequest questionRequest) {
+        return new ResponseEntity<QuestionProcessResponse>(questionService.getQuestionAddResponse(questionRequest),
                 HttpStatus.OK);
     }
 
     @PutMapping(value = "/questions/{id}")
     @PreAuthorize("hasAuthority('user:moderate')")
-    public ResponseEntity<QuestionResponse> editQuestion(@PathVariable final int id,
-                                                         @RequestBody final QuestionRequest questionRequest) {
-        return new ResponseEntity<QuestionResponse>(questionService.getQuestionEditResponse(id, questionRequest),
+    public ResponseEntity<QuestionProcessResponse> editQuestion(@PathVariable final int id,
+                                                                @RequestBody final QuestionRequest questionRequest) {
+        return new ResponseEntity<QuestionProcessResponse>(questionService.getQuestionEditResponse(id, questionRequest),
                 HttpStatus.OK);
     }
 
     @DeleteMapping("/questions/{id}")
     @PreAuthorize("hasAuthority('user:moderate')")
-    public ResponseEntity<QuestionResponse> deleteQuestion(@PathVariable final int id) {
-        QuestionResponse response = questionService.getQuestionDeleteResponse(id);
+    public ResponseEntity<QuestionProcessResponse> deleteQuestion(@PathVariable final int id) {
+        QuestionProcessResponse response = questionService.getQuestionDeleteResponse(id);
         if (response.isResult()) {
-            return new ResponseEntity<QuestionResponse>(response, HttpStatus.OK);
+            return new ResponseEntity<QuestionProcessResponse>(response, HttpStatus.OK);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }

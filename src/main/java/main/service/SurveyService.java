@@ -1,14 +1,21 @@
 package main.service;
 
 import main.api.request.SurveyRequest;
+import main.api.response.SurveyProcessResponse;
 import main.api.response.SurveyResponse;
+import main.dto.QuestionDto;
+import main.model.Question;
+import main.model.QuestionType;
 import main.model.Survey;
 import main.repository.SurveyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -22,37 +29,46 @@ public class SurveyService {
         this.surveyRepository = surveyRepository;
     }
 
-    public SurveyResponse getSurveyCreateResponse(final SurveyRequest surveyRequest) {
-        Optional<HashMap<String, String>> optionalErrors = checkSurveyRequest(surveyRequest);
-        if (optionalErrors.isPresent()) {
-            return new SurveyResponse(false, optionalErrors.get());
+    public Optional<SurveyResponse> getSurveyByIdResponse(final int id) {
+        Optional<Survey> optionalSurvey = surveyRepository.findById(id);
+        if (optionalSurvey.isPresent()) {
+            return Optional.of(getSurveyResponse(optionalSurvey.get()));
         } else {
-            addNewSurvey(surveyRequest);
-            return new SurveyResponse(true);
+            return Optional.empty();
         }
     }
 
-    public SurveyResponse getSurveyEditResponse(final int id, final SurveyRequest surveyRequest) {
+    public SurveyProcessResponse getSurveyCreateResponse(final SurveyRequest surveyRequest) {
+        Optional<HashMap<String, String>> optionalErrors = checkSurveyRequest(surveyRequest);
+        if (optionalErrors.isPresent()) {
+            return new SurveyProcessResponse(false, optionalErrors.get());
+        } else {
+            addNewSurvey(surveyRequest);
+            return new SurveyProcessResponse(true);
+        }
+    }
+
+    public SurveyProcessResponse getSurveyEditResponse(final int id, final SurveyRequest surveyRequest) {
         Optional<Survey> optionalSurvey = surveyRepository.findById(id);
         if (optionalSurvey.isPresent()) {
             Optional<HashMap<String, String>> optionalErrors = checkSurveyRequest(surveyRequest);
             if (optionalErrors.isPresent()) {
-                return new SurveyResponse(false, optionalErrors.get());
+                return new SurveyProcessResponse(false, optionalErrors.get());
             } else {
                 setEditableSurvey(optionalSurvey.get(), surveyRequest);
-                return new SurveyResponse(true);
+                return new SurveyProcessResponse(true);
             }
         } else {
-            return new SurveyResponse(false);
+            return new SurveyProcessResponse(false);
         }
     }
 
-    public SurveyResponse getSurveyDeleteResponse(final int id) {
+    public SurveyProcessResponse getSurveyDeleteResponse(final int id) {
         if (surveyRepository.existsById(id)) {
             surveyRepository.deleteById(id);
-            return new SurveyResponse(true);
+            return new SurveyProcessResponse(true);
         } else {
-            return new SurveyResponse(false);
+            return new SurveyProcessResponse(false);
         }
     }
 
@@ -70,7 +86,6 @@ public class SurveyService {
         survey.setStartDate(surveyRequest.getStartDate());
         survey.setFinishDate(surveyRequest.getFinishDate());
         survey.setDescription(surveyRequest.getDescription());
-        survey.setActive(false);
         surveyRepository.save(survey);
     }
 
@@ -78,8 +93,33 @@ public class SurveyService {
         survey.setFinishDate(surveyRequest.getFinishDate());
         survey.setTitle(surveyRequest.getTitle());
         survey.setDescription(surveyRequest.getDescription());
-        survey.setActive(surveyRequest.getActive());
         surveyRepository.save(survey);
+    }
+
+    private SurveyResponse getSurveyResponse(final Survey survey) {
+        SurveyResponse surveyResponse = new SurveyResponse();
+        surveyResponse.setId(survey.getId());
+
+        List<Question> questions = survey.getQuestions();
+        surveyResponse.setCount(questions.size());
+
+        List<QuestionDto> questionDtoList = new ArrayList<>();
+        questions.forEach(q -> questionDtoList.add(question2questionDto(q)));
+        surveyResponse.setQuestions(questionDtoList);
+        return surveyResponse;
+    }
+
+    private QuestionDto question2questionDto(final Question question) {
+        QuestionDto questionDto = new QuestionDto();
+        questionDto.setId(question.getId());
+        questionDto.setText(question.getText());
+        QuestionType type = question.getQuestionType();
+        questionDto.setType(type.name());
+
+        if (type.equals(QuestionType.SINGLE_CHOICE) || type.equals(QuestionType.MULTIPLE_CHOICE)) {
+            questionDto.setAmountOfItems(question.getAmountOfItems());
+        }
+        return questionDto;
     }
 
 }

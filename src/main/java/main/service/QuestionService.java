@@ -1,7 +1,7 @@
 package main.service;
 
 import main.api.request.QuestionRequest;
-import main.api.response.QuestionResponse;
+import main.api.response.QuestionProcessResponse;
 import main.model.Question;
 import main.model.QuestionType;
 import main.model.Survey;
@@ -21,31 +21,31 @@ public class QuestionService {
         this.surveyRepository = surveyRepository;
     }
 
-    public QuestionResponse getQuestionAddResponse(final QuestionRequest questionRequest) {
+    public QuestionProcessResponse getQuestionAddResponse(final QuestionRequest questionRequest) {
         if (checkSurveyForQuestion(questionRequest.getSurveyId())) {
             addQuestion(questionRequest);
-            return new QuestionResponse(true);
+            return new QuestionProcessResponse(true);
         } else {
-            return new QuestionResponse(false);
+            return new QuestionProcessResponse(false);
         }
     }
 
-    public QuestionResponse getQuestionEditResponse(final int id, final QuestionRequest questionRequest) {
+    public QuestionProcessResponse getQuestionEditResponse(final int id, final QuestionRequest questionRequest) {
         Optional<Question> optionalQuestion = questionRepository.findById(id);
         if (optionalQuestion.isPresent()) {
             setEditableQuestion(optionalQuestion.get(), questionRequest);
-            return new QuestionResponse(true);
+            return new QuestionProcessResponse(true);
         } else {
-            return new QuestionResponse(false);
+            return new QuestionProcessResponse(false);
         }
     }
 
-    public QuestionResponse getQuestionDeleteResponse(final int id) {
+    public QuestionProcessResponse getQuestionDeleteResponse(final int id) {
         if (questionRepository.existsById(id)) {
             questionRepository.deleteById(id);
-            return new QuestionResponse(true);
+            return new QuestionProcessResponse(true);
         } else {
-            return new QuestionResponse(false);
+            return new QuestionProcessResponse(false);
         }
     }
 
@@ -57,7 +57,7 @@ public class QuestionService {
         question.setQuestionType(type);
         question.setText(questionRequest.getText());
         if (type.equals(QuestionType.SINGLE_CHOICE) || type.equals(QuestionType.MULTIPLE_CHOICE)) {
-            question.setNumberOfItems(questionRequest.getNumberOfItems());
+            question.setAmountOfItems(questionRequest.getNumberOfItems());
         }
         questionRepository.save(question);
     }
@@ -65,7 +65,7 @@ public class QuestionService {
     private void setEditableQuestion(final Question question, final QuestionRequest questionRequest) {
         question.setText(questionRequest.getText());
         question.setQuestionType(questionRequest.getQuestionType());
-        question.setNumberOfItems(questionRequest.getNumberOfItems());
+        question.setAmountOfItems(questionRequest.getNumberOfItems());
         questionRepository.save(question);
     }
 

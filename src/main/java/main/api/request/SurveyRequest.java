@@ -18,5 +18,4 @@ public class SurveyRequest {
     private Date finishDate;
     private String title;
     private String description;
-    private Boolean active;
 }

@@ -1,22 +1,18 @@
 package main.api.response;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import main.dto.QuestionDto;
 
-import java.util.HashMap;
+import java.util.List;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class SurveyResponse {
-    private boolean result;
+    private int id;
+    private int count;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private HashMap<String,String> errors;
-
-    public SurveyResponse(boolean result) {
-        this.result = result;
-    }
+    private List<QuestionDto> questions;
 }

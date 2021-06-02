@@ -20,6 +20,6 @@ public class Question extends BaseEntity{
     @JoinColumn(name = "survey_id", nullable = false)
     private Survey survey;
 
-    @Column(name = "number_of_items")
-    private Integer numberOfItems;
+    @Column(name = "amount_of_items")
+    private Integer amountOfItems;
 }
