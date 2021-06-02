@@ -1,6 +1,7 @@
 package main.controller;
 
 import main.api.request.SurveyRequest;
+import main.api.response.ActiveSurveyResponse;
 import main.api.response.SurveyProcessResponse;
 import main.api.response.SurveyResponse;
 import main.service.SurveyService;
@@ -31,6 +32,16 @@ public class SurveyController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
+    }
+
+    @GetMapping(value = "/surveys/active")
+    public ResponseEntity<ActiveSurveyResponse> getActiveSurveys() {
+        Optional<ActiveSurveyResponse> optionalActiveSurveyResponse = surveyService.getActiveSurveyResponse();
+        if (optionalActiveSurveyResponse.isPresent()) {
+            return new ResponseEntity<ActiveSurveyResponse>(optionalActiveSurveyResponse.get(), HttpStatus.OK);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 
     @PostMapping(value = "/surveys")

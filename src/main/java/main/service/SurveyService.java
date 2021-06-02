@@ -1,8 +1,10 @@
 package main.service;
 
 import main.api.request.SurveyRequest;
+import main.api.response.ActiveSurveyResponse;
 import main.api.response.SurveyProcessResponse;
 import main.api.response.SurveyResponse;
+import main.dto.ActiveSurveyDto;
 import main.dto.QuestionDto;
 import main.model.Question;
 import main.model.QuestionType;
@@ -33,6 +35,21 @@ public class SurveyService {
         Optional<Survey> optionalSurvey = surveyRepository.findById(id);
         if (optionalSurvey.isPresent()) {
             return Optional.of(getSurveyResponse(optionalSurvey.get()));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    public Optional<ActiveSurveyResponse> getActiveSurveyResponse() {
+        Optional<List<Survey>> optionalSurveyList = surveyRepository.findAllActiveSurveys();
+        if (optionalSurveyList.isPresent()) {
+            ActiveSurveyResponse activeSurveyResponse = new ActiveSurveyResponse();
+            List<Survey> surveys = optionalSurveyList.get();
+            List<ActiveSurveyDto> activeSurveyDtoList = new ArrayList<>();
+            surveys.forEach(s -> activeSurveyDtoList.add(survey2activeSurveyDto(s)));
+            activeSurveyResponse.setCount(surveys.size());
+            activeSurveyResponse.setActiveSurveys(activeSurveyDtoList);
+            return Optional.of(activeSurveyResponse);
         } else {
             return Optional.empty();
         }
@@ -122,4 +139,10 @@ public class SurveyService {
         return questionDto;
     }
 
+    private ActiveSurveyDto survey2activeSurveyDto(Survey survey) {
+        ActiveSurveyDto activeSurveyDto = new ActiveSurveyDto();
+        activeSurveyDto.setId(survey.getId());
+        activeSurveyDto.setTitle(survey.getTitle());
+        return activeSurveyDto;
+    }
 }

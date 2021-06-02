@@ -13,4 +13,6 @@ public class Answer extends BaseEntity{
     @Enumerated(EnumType.STRING)
     @Column(name = "question_type",  nullable = false, columnDefinition = "enum('TEXT', 'SINGLE_CHOICE', 'MULTIPLE_CHOICE')")
     protected QuestionType questionType;
+
+    private int userId;
 }
