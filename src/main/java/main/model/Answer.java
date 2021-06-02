@@ -2,17 +2,24 @@ package main.model;
 
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.*;
+import java.util.List;
 
-@MappedSuperclass
+@Entity
+@Table(name = "answers")
 @Data
-public class Answer extends BaseEntity{
-    @Enumerated(EnumType.STRING)
-    @Column(name = "question_type",  nullable = false, columnDefinition = "enum('TEXT', 'SINGLE_CHOICE', 'MULTIPLE_CHOICE')")
-    protected QuestionType questionType;
+public class Answer extends BaseEntity {
 
-    private int userId;
+    private String text;
+
+    @OneToMany(mappedBy = "answer", fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<AnswerItem> answerItem;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "question_id", nullable = false)
+    private Question question;
 }

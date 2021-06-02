@@ -25,4 +25,5 @@ public class Survey extends BaseEntity {
 
     @OneToMany(mappedBy = "survey", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Question> questions;
+
 }
