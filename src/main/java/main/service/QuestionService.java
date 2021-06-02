@@ -9,6 +9,8 @@ import main.repository.QuestionRepository;
 import main.repository.SurveyRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class QuestionService {
     private final QuestionRepository questionRepository;
@@ -28,7 +30,15 @@ public class QuestionService {
         }
     }
 
-    //TODO изменение вопроса
+    public QuestionResponse getQuestionEditResponse(final int id, final QuestionRequest questionRequest) {
+        Optional<Question> optionalQuestion = questionRepository.findById(id);
+        if (optionalQuestion.isPresent()) {
+            setEditableQuestion(optionalQuestion.get(), questionRequest);
+            return new QuestionResponse(true);
+        } else {
+            return new QuestionResponse(false);
+        }
+    }
 
     public QuestionResponse getQuestionDeleteResponse(final int id) {
         if (questionRepository.existsById(id)) {
@@ -49,6 +59,13 @@ public class QuestionService {
         if (type.equals(QuestionType.SINGLE_CHOICE) || type.equals(QuestionType.MULTIPLE_CHOICE)) {
             question.setNumberOfItems(questionRequest.getNumberOfItems());
         }
+        questionRepository.save(question);
+    }
+
+    private void setEditableQuestion(final Question question, final QuestionRequest questionRequest) {
+        question.setText(questionRequest.getText());
+        question.setQuestionType(questionRequest.getQuestionType());
+        question.setNumberOfItems(questionRequest.getNumberOfItems());
         questionRepository.save(question);
     }
 

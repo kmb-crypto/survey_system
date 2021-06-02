@@ -1,6 +1,7 @@
 package main.controller;
 
 import main.api.request.QuestionRequest;
+import main.api.request.SurveyRequest;
 import main.api.response.QuestionResponse;
 import main.api.response.SurveyResponse;
 import main.service.QuestionService;
@@ -21,7 +22,16 @@ public class QuestionController {
     @PostMapping("/questions")
     @PreAuthorize("hasAuthority('user:moderate')")
     public ResponseEntity<QuestionResponse> addQuestion(@RequestBody final QuestionRequest questionRequest) {
-        return new ResponseEntity<QuestionResponse>(questionService.getQuestionAddResponse(questionRequest), HttpStatus.OK);
+        return new ResponseEntity<QuestionResponse>(questionService.getQuestionAddResponse(questionRequest),
+                HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/questions/{id}")
+    @PreAuthorize("hasAuthority('user:moderate')")
+    public ResponseEntity<QuestionResponse> editQuestion(@PathVariable final int id,
+                                                         @RequestBody final QuestionRequest questionRequest) {
+        return new ResponseEntity<QuestionResponse>(questionService.getQuestionEditResponse(id, questionRequest),
+                HttpStatus.OK);
     }
 
     @DeleteMapping("/questions/{id}")

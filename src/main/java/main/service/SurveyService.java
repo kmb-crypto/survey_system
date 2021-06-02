@@ -33,12 +33,13 @@ public class SurveyService {
     }
 
     public SurveyResponse getSurveyEditResponse(final int id, final SurveyRequest surveyRequest) {
-        if (surveyRepository.existsById(id)) {
+        Optional<Survey> optionalSurvey = surveyRepository.findById(id);
+        if (optionalSurvey.isPresent()) {
             Optional<HashMap<String, String>> optionalErrors = checkSurveyRequest(surveyRequest);
             if (optionalErrors.isPresent()) {
                 return new SurveyResponse(false, optionalErrors.get());
             } else {
-                setEditableSurvey(surveyRepository.findById(id).get(), surveyRequest);
+                setEditableSurvey(optionalSurvey.get(), surveyRequest);
                 return new SurveyResponse(true);
             }
         } else {
