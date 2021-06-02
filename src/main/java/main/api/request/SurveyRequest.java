@@ -10,7 +10,7 @@ import java.sql.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SurveyCreateRequest {
+public class SurveyRequest {
     @JsonProperty("start_date")
     private Date startDate;
 
@@ -18,4 +18,5 @@ public class SurveyCreateRequest {
     private Date finishDate;
     private String title;
     private String description;
+    private Boolean active;
 }

@@ -1,7 +1,7 @@
 package main.controller;
 
-import main.api.request.SurveyCreateRequest;
-import main.api.response.SurveyCreateResponse;
+import main.api.request.SurveyRequest;
+import main.api.response.SurveyResponse;
 import main.api.response.SurveyDeleteResponse;
 import main.service.SurveyService;
 import org.springframework.http.HttpStatus;
@@ -21,10 +21,24 @@ public class SurveyController {
 
     @PostMapping(value = "/surveys")
     @PreAuthorize("hasAuthority('user:moderate')")
-    public ResponseEntity<SurveyCreateResponse> createSurvey(
-            @RequestBody final SurveyCreateRequest surveyCreateRequest) {
-        return new ResponseEntity<SurveyCreateResponse>(surveyService.getSurveyCreateResponse(surveyCreateRequest),
+    public ResponseEntity<SurveyResponse> createSurvey(
+            @RequestBody final SurveyRequest surveyRequest) {
+        return new ResponseEntity<SurveyResponse>(surveyService.getSurveyCreateResponse(surveyRequest),
                 HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/surveys/{id}")
+    @PreAuthorize("hasAuthority('user:moderate')")
+    public ResponseEntity<SurveyResponse> editSurvey(@PathVariable final int id,
+                                                     @RequestBody final SurveyRequest surveyRequest) {
+        SurveyResponse response = surveyService.getSurveyEditResponse(id, surveyRequest);
+        if (response.isResult()) {
+            return new ResponseEntity<SurveyResponse>(response, HttpStatus.OK);
+        } else if (response.getErrors() == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } else {
+            return new ResponseEntity<SurveyResponse>(response, HttpStatus.OK);
+        }
     }
 
     @DeleteMapping(value = "/surveys/{id}")

@@ -1,7 +1,7 @@
 package main.service;
 
-import main.api.request.SurveyCreateRequest;
-import main.api.response.SurveyCreateResponse;
+import main.api.request.SurveyRequest;
+import main.api.response.SurveyResponse;
 import main.api.response.SurveyDeleteResponse;
 import main.model.Survey;
 import main.repository.SurveyRepository;
@@ -23,17 +23,29 @@ public class SurveyService {
         this.surveyRepository = surveyRepository;
     }
 
-    public SurveyCreateResponse getSurveyCreateResponse(final SurveyCreateRequest surveyCreateRequest) {
-        Optional<HashMap<String, String>> optionalErrors = checkSurveyCreateRequest(surveyCreateRequest);
+    public SurveyResponse getSurveyCreateResponse(final SurveyRequest surveyRequest) {
+        Optional<HashMap<String, String>> optionalErrors = checkSurveyRequest(surveyRequest);
         if (optionalErrors.isPresent()) {
-            return new SurveyCreateResponse(false, optionalErrors.get());
+            return new SurveyResponse(false, optionalErrors.get());
         } else {
-            addNewSurvey(surveyCreateRequest);
-            return new SurveyCreateResponse(true);
+            addNewSurvey(surveyRequest);
+            return new SurveyResponse(true);
         }
     }
 
-    //TODO изменение опроса
+    public SurveyResponse getSurveyEditResponse(final int id, final SurveyRequest surveyRequest) {
+        if (surveyRepository.existsById(id)) {
+            Optional<HashMap<String, String>> optionalErrors = checkSurveyRequest(surveyRequest);
+            if (optionalErrors.isPresent()) {
+                return new SurveyResponse(false, optionalErrors.get());
+            } else {
+                setEditableSurvey(surveyRepository.findById(id).get(), surveyRequest);
+                return new SurveyResponse(true);
+            }
+        } else {
+            return new SurveyResponse(false);
+        }
+    }
 
     public SurveyDeleteResponse getSurveyDeleteResponse(final int id) {
         if (surveyRepository.existsById(id)) {
@@ -44,21 +56,30 @@ public class SurveyService {
         }
     }
 
-    private Optional<HashMap<String, String>> checkSurveyCreateRequest(final SurveyCreateRequest surveyCreateRequest) {
+    private Optional<HashMap<String, String>> checkSurveyRequest(final SurveyRequest surveyRequest) {
         HashMap<String, String> errors = new HashMap<>();
-        if (surveyCreateRequest.getTitle().length() < minTitleLength) {
+        if (surveyRequest.getTitle().length() < minTitleLength) {
             errors.put("title", "Заголовок короче " + minTitleLength + " символов");
         }
         return errors.size() > 0 ? Optional.of(errors) : Optional.empty();
     }
 
-    private void addNewSurvey(final SurveyCreateRequest surveyCreateRequest) {
+
+    private void addNewSurvey(final SurveyRequest surveyRequest) {
         Survey survey = new Survey();
-        survey.setTitle(surveyCreateRequest.getTitle());
-        survey.setStartDate(surveyCreateRequest.getStartDate());
-        survey.setFinishDate(surveyCreateRequest.getFinishDate());
-        survey.setDescription(surveyCreateRequest.getDescription());
+        survey.setTitle(surveyRequest.getTitle());
+        survey.setStartDate(surveyRequest.getStartDate());
+        survey.setFinishDate(surveyRequest.getFinishDate());
+        survey.setDescription(surveyRequest.getDescription());
         survey.setActive(false);
+        surveyRepository.save(survey);
+    }
+
+    private void setEditableSurvey(final Survey survey, final SurveyRequest surveyRequest) {
+        survey.setFinishDate(surveyRequest.getFinishDate());
+        survey.setTitle(surveyRequest.getTitle());
+        survey.setDescription(surveyRequest.getDescription());
+        survey.setActive(surveyRequest.getActive());
         surveyRepository.save(survey);
     }
 
