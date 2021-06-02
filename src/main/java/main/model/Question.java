@@ -19,4 +19,7 @@ public class Question extends BaseEntity{
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "survey_id", nullable = false)
     private Survey survey;
+
+    @Column(name = "number_of_items")
+    private Integer numberOfItems;
 }

@@ -9,7 +9,7 @@ POST /api/auth/login</h3>
     "password" : "password"
 }
 
-ответ при успешной авторизации:
+ответ при успешной авторизации - статус 200
 {
     "result":  true,
     "user": {
@@ -19,7 +19,7 @@ POST /api/auth/login</h3>
     }
 }
 
-ответ при ошибке
+ответ при ошибке - статус 200
 {
     "result": false
 }
@@ -27,3 +27,26 @@ POST /api/auth/login</h3>
 
 <h3>создание опроса<br>
 POST /api/surveys/</h3>
+ответ при успешном создании - статус 200
+{
+    "result": true
+}
+
+ответ при ошибке - статус 200
+{
+    "result": false
+    "errors":{
+        "some error":"description"    
+    }
+}
+
+<h3>удаление<br>
+DELETE /api/surveys/ID</h3>
+ответ при успешном удалении - статус 200
+{   
+    "result": true
+}
+ответ при ошибке - статус 404
+{   
+"result": false
+}
