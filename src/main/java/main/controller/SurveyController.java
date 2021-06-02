@@ -2,7 +2,6 @@ package main.controller;
 
 import main.api.request.SurveyRequest;
 import main.api.response.SurveyResponse;
-import main.api.response.SurveyDeleteResponse;
 import main.service.SurveyService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,10 +42,10 @@ public class SurveyController {
 
     @DeleteMapping(value = "/surveys/{id}")
     @PreAuthorize("hasAuthority('user:moderate')")
-    public ResponseEntity<SurveyDeleteResponse> deleteSurvey(@PathVariable final int id) {
-        SurveyDeleteResponse response = surveyService.getSurveyDeleteResponse(id);
+    public ResponseEntity<SurveyResponse> deleteSurvey(@PathVariable final int id) {
+        SurveyResponse response = surveyService.getSurveyDeleteResponse(id);
         if (response.isResult()) {
-            return new ResponseEntity<SurveyDeleteResponse>(response, HttpStatus.OK);
+            return new ResponseEntity<SurveyResponse>(response, HttpStatus.OK);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }

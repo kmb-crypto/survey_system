@@ -9,7 +9,7 @@ import main.model.QuestionType;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class QuestionAddRequest {
+public class QuestionRequest {
     @JsonProperty("survey_id")
     private int surveyId;
 

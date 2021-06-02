@@ -7,6 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class QuestionAddResponse {
+public class QuestionResponse {
     private boolean result;
 }

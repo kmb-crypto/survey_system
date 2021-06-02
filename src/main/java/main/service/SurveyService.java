@@ -2,7 +2,6 @@ package main.service;
 
 import main.api.request.SurveyRequest;
 import main.api.response.SurveyResponse;
-import main.api.response.SurveyDeleteResponse;
 import main.model.Survey;
 import main.repository.SurveyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,12 +46,12 @@ public class SurveyService {
         }
     }
 
-    public SurveyDeleteResponse getSurveyDeleteResponse(final int id) {
+    public SurveyResponse getSurveyDeleteResponse(final int id) {
         if (surveyRepository.existsById(id)) {
-            deleteSurvey(id);
-            return new SurveyDeleteResponse(true);
+            surveyRepository.deleteById(id);
+            return new SurveyResponse(true);
         } else {
-            return new SurveyDeleteResponse(false);
+            return new SurveyResponse(false);
         }
     }
 
@@ -63,7 +62,6 @@ public class SurveyService {
         }
         return errors.size() > 0 ? Optional.of(errors) : Optional.empty();
     }
-
 
     private void addNewSurvey(final SurveyRequest surveyRequest) {
         Survey survey = new Survey();
@@ -83,7 +81,4 @@ public class SurveyService {
         surveyRepository.save(survey);
     }
 
-    private void deleteSurvey(final int id) {
-        surveyRepository.deleteById(id);
-    }
 }
