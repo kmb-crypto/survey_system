@@ -22,7 +22,7 @@ public class AnswerController {
     }
 
     @PostMapping(value = "/answers")
-    public ResponseEntity<AnswerResponse> postAnswer(@RequestBody final AnswerRequest answerRequest, Principal principal) {
+    public ResponseEntity<AnswerResponse> postAnswer(@RequestBody final AnswerRequest answerRequest, final Principal principal) {
         return new ResponseEntity<AnswerResponse>(answerService.getAnswerAddResponse(answerRequest, principal), HttpStatus.OK);
     }
 }

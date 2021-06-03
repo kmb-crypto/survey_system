@@ -48,7 +48,7 @@ public class AuthService {
 
     }
 
-    private LoginResponseUserDto user2LoginResponseUserDto(User currentUser) {
+    private LoginResponseUserDto user2LoginResponseUserDto(final User currentUser) {
         LoginResponseUserDto loginResponseUserDto = new LoginResponseUserDto();
         loginResponseUserDto.setId(currentUser.getId());
         loginResponseUserDto.setName(currentUser.getName());

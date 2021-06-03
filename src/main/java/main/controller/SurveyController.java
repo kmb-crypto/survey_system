@@ -1,7 +1,9 @@
 package main.controller;
 
 import main.api.request.CompletedSurveysRequest;
+import main.api.request.QuestionsAndAnswersRequest;
 import main.api.request.SurveyRequest;
+import main.api.response.QuestionsAndAnswersResponse;
 import main.api.response.SurveyListResponse;
 import main.api.response.SurveyProcessResponse;
 import main.api.response.SurveyResponse;
@@ -49,8 +51,15 @@ public class SurveyController {
     public ResponseEntity<SurveyListResponse> getCompletedSurveys(
             @RequestBody final CompletedSurveysRequest completedSurveysRequest, final Principal principal) {
         return new ResponseEntity<SurveyListResponse>(
-                surveyService.getCompletedSurveysByUser(completedSurveysRequest, principal), HttpStatus.OK);
+                surveyService.getCompletedSurveysByUserResponse(completedSurveysRequest, principal), HttpStatus.OK);
 
+    }
+
+    @GetMapping(value = "/surveys/questions_and_answers")
+    public ResponseEntity<QuestionsAndAnswersResponse> getQuestionsAndAnswers(
+            @RequestBody final QuestionsAndAnswersRequest questionsAndAnswersRequest, final Principal principal) {
+        return new ResponseEntity<QuestionsAndAnswersResponse>(
+                surveyService.getQuestionsAndAnswersBySurveyByUserResponse(questionsAndAnswersRequest, principal), HttpStatus.OK);
     }
 
     @PostMapping(value = "/surveys")

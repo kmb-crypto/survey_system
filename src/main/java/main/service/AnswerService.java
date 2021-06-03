@@ -26,7 +26,7 @@ public class AnswerService {
         this.questionRepository = questionRepository;
     }
 
-    public AnswerResponse getAnswerAddResponse(final AnswerRequest answerRequest, Principal principal) {
+    public AnswerResponse getAnswerAddResponse(final AnswerRequest answerRequest, final Principal principal) {
         Optional<User> optionalUser = principal == null ? userRepository.findById(answerRequest.getAnonymousId())
                 : userRepository.findByName(principal.getName());
 

@@ -1,13 +1,13 @@
 package main.service;
 
 import main.api.request.CompletedSurveysRequest;
+import main.api.request.QuestionsAndAnswersRequest;
 import main.api.request.SurveyRequest;
+import main.api.response.QuestionsAndAnswersResponse;
 import main.api.response.SurveyListResponse;
 import main.api.response.SurveyProcessResponse;
 import main.api.response.SurveyResponse;
-import main.dto.SurveyIdAndTitleDto;
-import main.dto.QuestionDto;
-import main.dto.SurveysCompletedByUserNative;
+import main.dto.*;
 import main.model.Question;
 import main.model.QuestionType;
 import main.model.Survey;
@@ -61,15 +61,25 @@ public class SurveyService {
         }
     }
 
-    public SurveyListResponse getCompletedSurveysByUser(final CompletedSurveysRequest completedSurveysRequest,
-                                                        final Principal principal) {
+    public SurveyListResponse getCompletedSurveysByUserResponse(final CompletedSurveysRequest completedSurveysRequest,
+                                                                final Principal principal) {
         int id = principal == null ? completedSurveysRequest.getAnonymousId()
                 : userRepository.findByName(principal.getName()).get().getId();
         List<SurveysCompletedByUserNative> completedSurveys = surveyRepository.findAllSurveysCompletedByUser(id);
 
-
         return new SurveyListResponse(completedSurveys.size(), NativeSurveys2SurveysIdAndTitleList(completedSurveys));
+    }
 
+    public QuestionsAndAnswersResponse getQuestionsAndAnswersBySurveyByUserResponse(final QuestionsAndAnswersRequest questionsAndAnswersRequest,
+                                                                                    final Principal principal) {
+        int id = principal == null ? questionsAndAnswersRequest.getAnonymousId()
+                : userRepository.findByName(principal.getName()).get().getId();
+        List<QuestionsAndAnswersBySurveyByUserNative> questionsAndAnswersNative =
+                surveyRepository.findQuestionsAndAnswersBySurveyByUser(id, questionsAndAnswersRequest.getSurveyId());
+
+        return new QuestionsAndAnswersResponse(questionsAndAnswersRequest.getSurveyId(),
+                questionsAndAnswersNative.size(),
+                questionAndAnswerNative2questionsAndAnswersDto(questionsAndAnswersNative));
     }
 
     public SurveyProcessResponse getSurveyCreateResponse(final SurveyRequest surveyRequest) {
@@ -156,7 +166,7 @@ public class SurveyService {
         return questionDto;
     }
 
-    private SurveyIdAndTitleDto survey2activeSurveyDto(Survey survey) {
+    private SurveyIdAndTitleDto survey2activeSurveyDto(final Survey survey) {
         SurveyIdAndTitleDto surveyIdAndTitleDto = new SurveyIdAndTitleDto();
         surveyIdAndTitleDto.setId(survey.getId());
         surveyIdAndTitleDto.setTitle(survey.getTitle());
@@ -172,7 +182,38 @@ public class SurveyService {
             surveyIdAndTitleDto.setTitle(nativeSurvey.getTitle());
             surveysList.add(surveyIdAndTitleDto);
         }
-
         return surveysList;
+    }
+
+    private List<QuestionAndAnswerDto> questionAndAnswerNative2questionsAndAnswersDto(
+            final List<QuestionsAndAnswersBySurveyByUserNative> questionsAndAnswersNative) {
+        List<QuestionAndAnswerDto> questionAndAnswerDtoList = new ArrayList<>();
+        for (QuestionsAndAnswersBySurveyByUserNative qaNative : questionsAndAnswersNative) {
+            QuestionAndAnswerDto questionAndAnswerDto = new QuestionAndAnswerDto();
+            questionAndAnswerDto.setQuestionText(qaNative.getQuestion());
+            String type = qaNative.getType();
+            questionAndAnswerDto.setQuestionType(type);
+            List<Integer> items;
+
+            switch (type) {
+                case "TEXT":
+                    questionAndAnswerDto.setAnswerText(qaNative.getAnswer());
+                    break;
+                case "SINGLE_CHOICE":
+                    items = new ArrayList<>();
+                    items.add(Integer.parseInt(qaNative.getAnswer()));
+                    questionAndAnswerDto.setItems(items);
+                    break;
+                case "MULTIPLE_CHOICE":
+                    items = new ArrayList<>();
+                    String itemsText = qaNative.getAnswer();
+                    for (int i = 0; i < itemsText.length(); i++) {
+                        items.add(Integer.parseInt(String.valueOf(itemsText.charAt(i))));
+                    }
+                    questionAndAnswerDto.setItems(items);
+            }
+            questionAndAnswerDtoList.add(questionAndAnswerDto);
+        }
+        return questionAndAnswerDtoList;
     }
 }
