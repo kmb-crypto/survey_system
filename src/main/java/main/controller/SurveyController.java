@@ -1,7 +1,8 @@
 package main.controller;
 
+import main.api.request.CompletedSurveysRequest;
 import main.api.request.SurveyRequest;
-import main.api.response.ActiveSurveyResponse;
+import main.api.response.SurveyListResponse;
 import main.api.response.SurveyProcessResponse;
 import main.api.response.SurveyResponse;
 import main.service.SurveyService;
@@ -35,13 +36,21 @@ public class SurveyController {
     }
 
     @GetMapping(value = "/surveys/active")
-    public ResponseEntity<ActiveSurveyResponse> getActiveSurveys() {
-        Optional<ActiveSurveyResponse> optionalActiveSurveyResponse = surveyService.getActiveSurveyResponse();
+    public ResponseEntity<SurveyListResponse> getActiveSurveys() {
+        Optional<SurveyListResponse> optionalActiveSurveyResponse = surveyService.getActiveSurveyResponse();
         if (optionalActiveSurveyResponse.isPresent()) {
-            return new ResponseEntity<ActiveSurveyResponse>(optionalActiveSurveyResponse.get(), HttpStatus.OK);
+            return new ResponseEntity<SurveyListResponse>(optionalActiveSurveyResponse.get(), HttpStatus.OK);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
+    }
+
+    @GetMapping(value = "/surveys/complete")
+    public ResponseEntity<SurveyListResponse> getCompletedSurveys(
+            @RequestBody final CompletedSurveysRequest completedSurveysRequest, final Principal principal) {
+        return new ResponseEntity<SurveyListResponse>(
+                surveyService.getCompletedSurveysByUser(completedSurveysRequest, principal), HttpStatus.OK);
+
     }
 
     @PostMapping(value = "/surveys")

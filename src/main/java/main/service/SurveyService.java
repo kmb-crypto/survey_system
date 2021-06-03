@@ -1,15 +1,18 @@
 package main.service;
 
+import main.api.request.CompletedSurveysRequest;
 import main.api.request.SurveyRequest;
-import main.api.response.ActiveSurveyResponse;
+import main.api.response.SurveyListResponse;
 import main.api.response.SurveyProcessResponse;
 import main.api.response.SurveyResponse;
-import main.dto.ActiveSurveyDto;
+import main.dto.SurveyIdAndTitleDto;
 import main.dto.QuestionDto;
+import main.dto.SurveysCompletedByUserNative;
 import main.model.Question;
 import main.model.QuestionType;
 import main.model.Survey;
 import main.repository.SurveyRepository;
+import main.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,12 +26,15 @@ import java.util.Optional;
 @Service
 public class SurveyService {
     private final SurveyRepository surveyRepository;
+    private final UserRepository userRepository;
+
     @Value("${survey.min.title.length:6}")
     private double minTitleLength;
 
     @Autowired
-    public SurveyService(final SurveyRepository surveyRepository) {
+    public SurveyService(final SurveyRepository surveyRepository, final UserRepository userRepository) {
         this.surveyRepository = surveyRepository;
+        this.userRepository = userRepository;
     }
 
     public Optional<SurveyResponse> getSurveyByIdResponse(final int id) {
@@ -40,19 +46,30 @@ public class SurveyService {
         }
     }
 
-    public Optional<ActiveSurveyResponse> getActiveSurveyResponse() {
+    public Optional<SurveyListResponse> getActiveSurveyResponse() {
         Optional<List<Survey>> optionalSurveyList = surveyRepository.findAllActiveSurveys();
         if (optionalSurveyList.isPresent()) {
-            ActiveSurveyResponse activeSurveyResponse = new ActiveSurveyResponse();
+            SurveyListResponse surveyListResponse = new SurveyListResponse();
             List<Survey> surveys = optionalSurveyList.get();
-            List<ActiveSurveyDto> activeSurveyDtoList = new ArrayList<>();
-            surveys.forEach(s -> activeSurveyDtoList.add(survey2activeSurveyDto(s)));
-            activeSurveyResponse.setCount(surveys.size());
-            activeSurveyResponse.setActiveSurveys(activeSurveyDtoList);
-            return Optional.of(activeSurveyResponse);
+            List<SurveyIdAndTitleDto> surveyIdAndTitleDtoList = new ArrayList<>();
+            surveys.forEach(s -> surveyIdAndTitleDtoList.add(survey2activeSurveyDto(s)));
+            surveyListResponse.setCount(surveys.size());
+            surveyListResponse.setActiveSurveys(surveyIdAndTitleDtoList);
+            return Optional.of(surveyListResponse);
         } else {
             return Optional.empty();
         }
+    }
+
+    public SurveyListResponse getCompletedSurveysByUser(final CompletedSurveysRequest completedSurveysRequest,
+                                                        final Principal principal) {
+        int id = principal == null ? completedSurveysRequest.getAnonymousId()
+                : userRepository.findByName(principal.getName()).get().getId();
+        List<SurveysCompletedByUserNative> completedSurveys = surveyRepository.findAllSurveysCompletedByUser(id);
+
+
+        return new SurveyListResponse(completedSurveys.size(), NativeSurveys2SurveysIdAndTitleList(completedSurveys));
+
     }
 
     public SurveyProcessResponse getSurveyCreateResponse(final SurveyRequest surveyRequest) {
@@ -139,10 +156,23 @@ public class SurveyService {
         return questionDto;
     }
 
-    private ActiveSurveyDto survey2activeSurveyDto(Survey survey) {
-        ActiveSurveyDto activeSurveyDto = new ActiveSurveyDto();
-        activeSurveyDto.setId(survey.getId());
-        activeSurveyDto.setTitle(survey.getTitle());
-        return activeSurveyDto;
+    private SurveyIdAndTitleDto survey2activeSurveyDto(Survey survey) {
+        SurveyIdAndTitleDto surveyIdAndTitleDto = new SurveyIdAndTitleDto();
+        surveyIdAndTitleDto.setId(survey.getId());
+        surveyIdAndTitleDto.setTitle(survey.getTitle());
+        return surveyIdAndTitleDto;
+    }
+
+    private List<SurveyIdAndTitleDto> NativeSurveys2SurveysIdAndTitleList(
+            final List<SurveysCompletedByUserNative> completedSurveys) {
+        List<SurveyIdAndTitleDto> surveysList = new ArrayList<>();
+        for (SurveysCompletedByUserNative nativeSurvey : completedSurveys) {
+            SurveyIdAndTitleDto surveyIdAndTitleDto = new SurveyIdAndTitleDto();
+            surveyIdAndTitleDto.setId(nativeSurvey.getId());
+            surveyIdAndTitleDto.setTitle(nativeSurvey.getTitle());
+            surveysList.add(surveyIdAndTitleDto);
+        }
+
+        return surveysList;
     }
 }
